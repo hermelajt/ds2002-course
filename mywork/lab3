@@ -1,1 +1,29 @@
+code mywork/lab3/analyze-moby-dick.sh
+#!/bin/bash
 
+# Check correct number of arguments
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <search_word> <output_file>"
+    exit 1
+fi
+
+# Store arguments
+SEARCH_PATTERN=$1
+OUTPUT=$2
+
+# Download Moby Dick
+curl -s -o mobydick.txt https://gist.githubusercontent.com/StevenClontz/4445774/raw/1722a289b665d940495645a5eaaad4da8e3ad4c7/mobydick.txt 
+
+# Count occurrences
+OCCURRENCES=$(grep -o "$SEARCH_PATTERN" mobydick.txt | wc -l)
+
+# Write result to output file
+echo "The search pattern $SEARCH_PATTERN was found $OCCURRENCES time(s)." > "$OUTPUT"
+chmod +x mywork/lab3/analyze-moby-dick.sh
+code ~/.bashrc
+export GITHUB_USER="hermelajt"
+source ~/.bashrc
+echo $hermelajt
+git add mywork/lab3
+git commit -m "Completed lab3 scripts"
+git push
