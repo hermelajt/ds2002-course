@@ -146,8 +146,8 @@ Before you start coding, explore the `iss` database to understand its structure:
    
    b. **New Function: `register_reporter`**: Create a function that accepts three arguments:
       - `table`: The table name (should be `'reporters'`)
-      - `reporter_id`: Your computing ID (e.g., `'abc123'`)
-      - `reporter_name`: Your full name
+      - `reporter_id`: Your computing ID (e.g., `'mst3k'`)
+      - `reporter_name`: Your name
       
       The function should:
       - Query the `reporters` table to check if the `reporter_id` already exists
@@ -155,13 +155,13 @@ Before you start coding, explore the `iss` database to understand its structure:
       - If it already exists, skip the insertion (or update it)
       - Use parameterized queries to prevent SQL injection
       
-      **Hint:** Use `SELECT ... WHERE reporter_id = %s` to check existence, then `INSERT INTO ... VALUES (%s, %s)` if needed. See [Insert Data](../../practice/06-sql/README.md#insert-data) for examples.
+      **Hint:** Use `SELECT ... WHERE reporter_id = %s` to check existence, then `INSERT INTO ... VALUES (%s, %s)` if needed.  See [Insert Data](../../practice/06-sql/README.md#insert-data) for examples. These patterns are referred to as parameterized  statements.
    
    c. **Update the `load` function**: Instead of appending to a CSV file, INSERT the latest ISS location into the `locations` table. The function should insert the following fields:
       - `message`: The message from the API response
-      - `iss_position.latitude`: The latitude value
-      - `iss_position.longitude`: The longitude value
-      - `timestamp (UTC)`: The timestamp from the API (you may need to convert the format)
+      - `latitude`: The latitude value
+      - `longitude`: The longitude value
+      - `timestamp`: YYYY-MM-DD HH:MM:SS. The timestamp from the API may need to be converted to match that format.
       - `reporter_id`: Your computing ID (the same one you registered in `register_reporter`)
       
       **Hint:** Extract these values from the JSON data returned by your `extract` function. Use parameterized INSERT statements. Make sure to call `db.commit()` after inserting.
