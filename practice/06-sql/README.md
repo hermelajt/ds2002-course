@@ -17,17 +17,21 @@ Before you begin, you'll need to set up your environment to work with MySQL data
 
 Complete the Setup steps above before beginning the hands-on exercises below.
 
-### Step 1: Start up a Codespace
+### Step 1: Connect to the MySQL instance in AWS RDS
 
+**Option A:**
 Start up a new Codespace from your forked repository using the `MySQL` option. For detailed instructions, see [Start MySQL environment in Codespace](../../setup/codespace-mysql.md#step-2-start-mysql-environment-in-codespace).
-
-### Step 2: Connect to the MySQL instance in AWS RDS
-
-Connect to the remote MySQL database using the command-line client:
 
 ```bash
 mysql -h ds2002.cgls84scuy1e.us-east-1.rds.amazonaws.com -P 3306 -u ds2002 -p
 ```
+
+**Option B:**
+If you cannot spin up the MySQL Codespace environment, you can do the following in the standard course Codespace, assuming the Docker container service is installed:
+```bash
+docker run -it mysql:8.0 mysql -h  ds2002.cgls84scuy1e.us-east-1.rds.amazonaws.com -P 3306 -u ds2002 -p
+```
+`docker run -it mysql:8.0` launches the docker container service. It pulls the mysql container image (version 8.0) from DockerHub, a central software container registry, and launches in an interactive subprocess the `mysql` CLI with the command line arguments your provided.
 
 **Command options explained:**
 - `-h`: Specifies the server hosting the database
@@ -44,7 +48,7 @@ mysql>
 
 This indicates you're connected to the interactive MySQL command line interface and ready to execute SQL commands.
 
-### Step 3: Explore the existing databases and tables. 
+### Step 2: Explore the existing databases and tables. 
 
 ```sql
 SHOW DATABASES;
@@ -84,7 +88,7 @@ DESCRIBE users;
 DESCRIBE posts;
 ```
 
-### Step 4: Insert new data
+### Step 3: Insert new data
 
 At the moment the tables are empty. Let's change that.
 
@@ -123,7 +127,7 @@ Let's switch to the `posts` table.
 SELECT * FROM posts;
 ```
 
-### Step 5: Simple Joins
+### Step 4: Simple Joins
 
 Let's combine the information in both tables. The relationship between their records is linked through the primary key `userid` in the `users` table and the foreign key `userid` in the `posts` table.
 
@@ -141,13 +145,13 @@ SELECT posts.*, users.* FROM posts LEFT JOIN users ON posts.userid = users.useri
 
 You can learn more about joins in this [SQL tutorial](https://www.geeksforgeeks.org/sql/sql-join-set-1-inner-left-right-and-full-joins/).
 
-### Step 6: Creating Views
+### Step 5: Creating Views
 
 A view is populated by the results from a stored SQL query, e.g. the results of a filter or join operation. A view is named and shows up in the `SHOW FULL TABLES;` output. 
 
 ```sql
 CREATE VIEW `msg_by_user` AS SELECT 
-    users.*,
+    users.name, users.email, 
     posts.* 
 FROM users 
 LEFT JOIN posts 
@@ -156,7 +160,18 @@ WHERE posts.postid IS NOT NULL;
 ```
 In this example the view is named `msg_by_user` and provides the results of posts organized by users.
 
-### Step 7: SQL script files
+**Note: Views do not allow duplication of column headers.** In our example both `users` and `posts` tables contain the `userid` field. Selection of all fields from `users.*` and `posts.*` will fail:
+```sql
+CREATE VIEW `msg_by_user` AS SELECT 
+    users.*, 
+    posts.* 
+FROM users 
+LEFT JOIN posts 
+ON users.userid = posts.userid 
+WHERE posts.postid IS NOT NULL;
+```
+
+### Step 6: SQL script files
 
 Instead of typing SQL commands interactively, you can save SQL statements in a file and execute them using input redirection. This is useful for running multiple commands, setting up databases, or executing complex queries.
 

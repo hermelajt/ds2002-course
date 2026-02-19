@@ -12,7 +12,29 @@ You're walking your colleague through the following steps:
 
 ### Setup
 
-You'll need access to MySQL command-line tools. Use Codespace with the MySQL environment (see [setup instructions](../../setup/codespace-mysql.md)). Make sure you have the `MYSQL_PASSWORD` secret configured in your Codespace.
+You'll need access to MySQL command-line tools.
+
+**Option A:**
+Use Codespace with the MySQL environment (see [setup instructions](../../setup/codespace-mysql.md)). 
+
+```bash
+mysql -h dbhost -u root -p
+```
+
+**Password:** Make sure you have the `MYSQL_PASSWORD` secret configured in your Codespace.
+
+Create a new database called `<computing_id>_db`, e.g., `khs3z_db`. Use this database for Case Study 1. You have full admin privileges.
+
+**Option B:**
+If you cannot spin up the MySQL Codespace environment, you can do the following in the standard course Codespace or local terminal, assuming the Docker container service is installed:
+```bash
+docker run -it mysql:8.0 mysql -h ds2002.cgls84scuy1e.us-east-1.rds.amazonaws.com -P 3306 -u <uva_computing_id> -p
+```
+Replace `<uva_computing_id>` with your UVA computing ID (no `<>`). The `docker run -it mysql:8.0` command launches the Docker container service. It pulls the MySQL container image (version 8.0) from DockerHub, a central software container registry, and launches in an interactive subprocess the `mysql` CLI with the command line arguments you provided.
+
+**Password:** For MySQL access in AWS RDS, the password is the same as your computing ID.  
+
+The AWS RDS instance has an empty database `<computing_id>_db` set up for you, e.g., `khs3z_db`. Use this database for Case Study 1. You have full admin privileges.
 
 ### Step 1: Create Your Database Schema
 
@@ -37,13 +59,23 @@ You'll need access to MySQL command-line tools. Use Codespace with the MySQL env
 
 ### Step 2: Execute Your SQL Script
 
-Execute your `initialize.sql` script against the MySQL database in your Codespace:
+Execute your `initialize.sql` script against the MySQL database:
 
+**Option A (in MySQL Codespace):**
 ```bash
 mysql -h dbhost -u root -p < initialize.sql
 ```
 
 When prompted, enter the password from your Codespace secret `MYSQL_PASSWORD`.
+
+**Option B (in standard course Codespace or terminal with Docker):**
+```bash
+docker run -it mysql:8.0 mysql -h ds2002.cgls84scuy1e.us-east-1.rds.amazonaws.com -P 3306 -u <uva_computing_id> -p < initialize.sql
+```
+
+Replace `<uva_computing_id>` with your UVA computing ID (no `<>`). The `docker run -it mysql:8.0` command launches the Docker container service. It pulls the MySQL container image (version 8.0) from DockerHub, a central software container registry, and launches in an interactive subprocess the `mysql` CLI with the command line arguments you provided.
+
+**Password:** For MySQL access in AWS RDS, the password is the same as your computing ID.
 
 **Hint:** See [Step 7: SQL script files](../../practice/06-sql/README.md#step-7-sql-script-files) for more details on executing SQL scripts.
 
@@ -57,11 +89,19 @@ When prompted, enter the password from your Codespace secret `MYSQL_PASSWORD`.
    - Include a WHERE clause to filter the results
 
 3. Execute the query and save the output to a file:
+   **Option A (in MySQL Codespace):**
    ```bash
    mysql -h dbhost -u root -p < query.sql > query_results.txt
    ```
    
    When prompted, enter the password from your Codespace secret `MYSQL_PASSWORD`.
+
+   **Option B (in standard course Codespace or terminal with Docker):**
+   ```bash
+   docker run -it mysql:8.0 mysql -h ds2002.cgls84scuy1e.us-east-1.rds.amazonaws.com -P 3306 -u <uva_computing_id> -p < query.sql > query_results.txt
+   ```
+
+   Your password for the AWS RDS instance is the same as your computing ID.
 
 4. Include `initialize.sql`, `query.sql`, and `query_results.txt` in your `mywork/lab5` folder.
 
@@ -83,7 +123,7 @@ The group has outgrown CSV files—they need a real database! They've set up a M
 
 For this task, you will need:
 
-1. **Python3**: Should be available in your path. Use `which python3` to find the path.
+1. **Python3**: Should be available in your path. Use `which python3` to find the path. Use a shebang at the top of your script: either `#!/usr/bin/env python` or `#!/usr/bin/env python3`.
 
 2. **Python Libraries**: Install the required packages:
    ```bash
@@ -109,8 +149,14 @@ For this task, you will need:
 Before you start coding, explore the `iss` database to understand its structure:
 
 1. Connect to the MySQL database:
+   **Option A:**
    ```bash
    mysql -h ds2002.cgls84scuy1e.us-east-1.rds.amazonaws.com -P 3306 -u ds2002 -p
+   ```
+
+   **or Option B:**
+   ```bash
+   docker run -it mysql:8.0 mysql -h ds2002.cgls84scuy1e.us-east-1.rds.amazonaws.com -P 3306 -u ds2002 -p
    ```
 
 2. When prompted, enter the password from **Canvas > Modules > Week 06 SQL & Relational Databases > AWS_RDS_credentials.txt**.
@@ -155,13 +201,13 @@ Before you start coding, explore the `iss` database to understand its structure:
       - If it already exists, skip the insertion (or update it)
       - Use parameterized queries to prevent SQL injection
       
-      **Hint:** Use `SELECT ... WHERE reporter_id = %s` to check existence, then `INSERT INTO ... VALUES (%s, %s)` if needed.  See [Insert Data](../../practice/06-sql/README.md#insert-data) for examples. These patterns are referred to as parameterized  statements.
+      **Hint:** Use `SELECT ... WHERE reporter_id = %s` to check existence, then `INSERT INTO ... VALUES (%s, %s)` if needed. See [Insert Data](../../practice/06-sql/README.md#insert-data) for examples. These patterns are referred to as parameterized statements.
    
    c. **Update the `load` function**: Instead of appending to a CSV file, INSERT the latest ISS location into the `locations` table. The function should insert the following fields:
       - `message`: The message from the API response
       - `latitude`: The latitude value
       - `longitude`: The longitude value
-      - `timestamp`: YYYY-MM-DD HH:MM:SS. The timestamp from the API may need to be converted to match that format.
+      - `timestamp`: Format as `YYYY-MM-DD HH:MM:SS`. The timestamp from the API may need to be converted to match that format.
       - `reporter_id`: Your computing ID (the same one you registered in `register_reporter`)
       
       **Hint:** Extract these values from the JSON data returned by your `extract` function. Use parameterized INSERT statements. Make sure to call `db.commit()` after inserting.
@@ -172,7 +218,7 @@ Before you start coding, explore the `iss` database to understand its structure:
 
 3. Test your modified script by running it at least 10 times. Each run should insert a new location record into the database.
 
-4. Confirm successful updates of the `iss` database by querying the `locations` and `reporters` tables. 
+4. Confirm successful updates of the `iss` database by querying the `locations` and `reporters` tables.
 
 5. **Optional additional challenge:** Write a Python script that executes a query joining the `reporters` and `locations` tables with optional filtering by `reporter_name` or `reporter_id`. 
 
@@ -212,5 +258,5 @@ You created the following files for this lab. All files should be in the folder 
 **Submission Steps:**
 1. Add all files to git: `git add mywork/lab5/*`
 2. Commit your work: `git commit -m "Complete Lab 05: SQL for Data Engineering"`
-3. Push to your repository: `git push`
+3. Push to your repository: `git push origin main`
 4. Submit the URL of your forked repository's `mywork/lab5` folder in the Canvas assignment. The URL should look like: `https://github.com/YOUR_USERNAME/ds2002-course/tree/main/mywork/lab5`
