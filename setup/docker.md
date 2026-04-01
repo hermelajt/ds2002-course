@@ -60,13 +60,7 @@ docker images
 Expected: `lolcow` appears in your local image list.
 
 ```bash
-docker pull godlovedc/lolcow
+docker run godlovedc/lolcow
 ```
 
 Expected: you see ASCII art output from the container.
-
-Optional cleanup:
-
-```bash
-docker rmi lolcow:latest
-```
