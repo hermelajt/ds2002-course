@@ -91,7 +91,7 @@ Replace `<uva_computing_id>` with your UVA computing ID (no `<>`).
 | `-it` | Interactive terminal (TTY + stdin) so the `mysql` client can prompt you and stay in a session. |
 | `mysql:8.0` | Image on Docker Hub: MySQL 8.0 client tools (and server bits in the image; here you only run the `mysql` CLI). |
 | `mysql` | Program run inside the container (the MySQL client). |
-| `-h ds2002.cgls84scuy1e.us-east-1.rds.amazonaws.com` | RDS hostname. |
+| `-h ds2002.cgls84scuy1e.us-east-1.rds.amazonaws.com` | Server (host) running the MySQL database. |
 | `-P 3306` | Port on the server (MySQL default). |
 | `-u <uva_computing_id>` | Database username (your computing ID). |
 | `-p` | Prompt for password after you press Enter (do not put the password on the command line). |
@@ -105,7 +105,21 @@ Replace `<uva_computing_id>` with your UVA computing ID (no `<>`).
 - Run `SHOW TABLES;` to list your tables. If you successfully completed [Lab 05, Case Study 1](../05-sql/README.md#case-study-1-sql-cli-scripts), you should have two tables. **Take note of the table names.**
 - Run `exit` to leave the MySQL instance. You will be back on your AWS EC2 instance (the prompt should show `ubuntu@ip-172-31-22-11:~$` or similar).
 
-### Step 3: Update your MySQL database
+### Step 3: Recreate your MySQL database (if needed)
+
+**If your database showed the two tables that you had created in Lab 5, great. Skip ahead to Step 4.** 
+
+**If your database is empty (no tables), don't worry. Follow these steps to (re)create the database using your `initialize.sql` script from Lab 5:**
+
+- On the ubuntu instance, create a new file `insert.sql` in nano and copy/paste your
+`initialize.sql` from Lab 5. Alternatively, clone your GitHub repository to the Ubuntu EC2 instance and change to the folder where the `initialize.sql` is located.
+- Run:  
+   ```bash
+   MYSQL_PWD=""   # put your MySQL password between the quotes (same as Lab 05 for this RDS user)
+   sudo docker run -i mysql:8.0 mysql -h ds2002.cgls84scuy1e.us-east-1.rds.amazonaws.com -P 3306 -u <uva_computing_id> -p"$MYSQL_PWD" < initialize.sql
+   ```
+
+### Step 4: Update your MySQL database
 
 1. Write a SQL script `add.sql` that inserts **5 new rows** across your two tables (not necessarily five per table—five new rows total is fine if your design fits). You can start from your Lab 05 `initialize.sql`: remove `CREATE TABLE` and related DDL, keep only `INSERT`-style changes, and adjust values so keys and constraints stay valid.
 
@@ -120,7 +134,7 @@ Replace `<uva_computing_id>` with your UVA computing ID (no `<>`).
 
    This is not the most secure way to handle the password, but it is acceptable for this lab.
 
-### Step 4: Query your updated database
+### Step 5: Query your updated database
 
 Copy `query.sql` from Lab 05 to the EC2 instance (for example with `scp` or by opening nano on the EC2 instance, pasting the content, and saving as `query.sql`). On the EC2 instance, from the directory that contains `query.sql`, run:
 
@@ -136,7 +150,7 @@ add.sql  get-docker.sh  query.sql  query_results.txt
 
 Check the contents of `query_results.txt` and confirm they match what you expect.
 
-### Step 5: Exit the EC2 instance
+### Step 6: Exit the EC2 instance
 
 Run:
 
@@ -146,7 +160,7 @@ exit
 
 This returns you to the shell from which you opened the SSH session (for example your HPC Open OnDemand terminal). Your prompt may look like `(ds2002) udc-aw32-1c$` or similar.
 
-### Step 6: Copy files from EC2 instance
+### Step 7: Copy files from EC2 instance
 
 On the HPC system, create your lab folder `mywork/lab10` in your forked repo, then change into it. Run `pwd` and confirm you are in the correct directory (`~/ds2002-course/mywork/lab10`).
 
